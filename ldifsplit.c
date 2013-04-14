@@ -1,4 +1,6 @@
 // LDIF -> JSON files that can be loaded using the elasticsearch _bulk api
+// Well, right now it just counts the number of newlines in your file!
+// Preparation I say!
 
 #include <stdio.h>
 #include <stdlib.h>
