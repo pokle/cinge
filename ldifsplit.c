@@ -15,13 +15,25 @@ size_t fdsize(int fd) {
 	return stats.st_size;
 }
 
-size_t count_newlines(char *start, size_t len) {
+size_t count_newlines(void *start, size_t len) {
     size_t count = 0;
-    for(char *curr = start;curr < (start + len); curr++) {
-        if (*curr == '\n') {
+
+    void  *end = start + len;    
+    void  *curr_str = start;
+    size_t curr_len = len;
+
+    while (curr_str < end) {        
+        void *newline = memchr(curr_str, '\n', curr_len);
+        if (NULL == newline) {
+            fputs("Done!\n", stderr);
+            break;
+        } else {
             count++;
+            curr_str = newline;
+            curr_len = end - newline;
         }
     }
+
     return count;
 }
 
@@ -43,7 +55,7 @@ int main(int argc, char *argv[]) {
 	size_t ldif_len = fdsize(fd);
 	fprintf(stderr, "File size is %llu\n", (unsigned long long)ldif_len);
 
-	char *ldif_mm = mmap(0, ldif_len, PROT_READ, MAP_FILE | MAP_NOCACHE | MAP_SHARED, fd, 0);
+	void *ldif_mm = mmap(0, ldif_len, PROT_READ, MAP_FILE | MAP_NOCACHE | MAP_SHARED, fd, 0);
 	if (MAP_FAILED == ldif_mm) {
 		fprintf(stderr, "Unable to memory map %s: %s\n", ldif_fn, strerror(errno));
 		exit(2);
