@@ -1,7 +1,7 @@
 cinge
 =====
 
-Extracts and transforms LDIF files for loading into Elasticsearch.
+Extracts and transforms LDIF files for loading into Elasticsearch. (Well, it's still work in progress)
 
 Benchmarks
 ==================
