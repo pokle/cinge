@@ -17,6 +17,38 @@ size_t fdsize(int fd) {
 	return stats.st_size;
 }
 
+void dump_cns(void *start, size_t len) {
+    char* search = "cn: ";
+    size_t search_len = strlen(search);
+
+    void  *end = start + len;    
+    void  *curr_str = start;
+    size_t curr_len = len;
+
+    while (curr_str < end) {        
+        void *match = strnstr(curr_str, search, curr_len);
+        if (NULL == match) {
+            break;
+        } else {
+            // Spit out the value in "key: value"
+            {
+                char *match_end = memchr(match, '\n', end - match);
+                if (NULL == match_end) {
+                    match_end = end;
+                }
+
+                char *value = match + search_len;
+                size_t value_len =  match_end - value + 1; // +1 to incl. newline
+                fwrite(value, value_len, 1, stdout);
+            }
+
+            // next
+            curr_str = match + search_len; // to skip the match
+            curr_len = end - match - search_len;
+        }
+    }
+}
+
 size_t count_newlines(void *start, size_t len) {
     size_t count = 0;
 
@@ -66,8 +98,9 @@ int main(int argc, char *argv[]) {
 		exit(2);
 	}
 
-    size_t num_newlines = count_newlines(ldif_mm, ldif_len);
-    printf("%llu\n", (unsigned long long)num_newlines);
+    // size_t num_newlines = count_newlines(ldif_mm, ldif_len);
+    // printf("%llu\n", (unsigned long long)num_newlines);
+    dump_cns(ldif_mm, ldif_len);
 
 	munmap(ldif_mm, ldif_len);
 	
