@@ -29,8 +29,8 @@ size_t count_newlines(void *start, size_t len) {
             break;
         } else {
             count++;
-            curr_str = newline;
-            curr_len = end - newline;
+            curr_str = newline + 1; // +1 to skip the newline
+            curr_len = end - newline - 1;
         }
     }
 
@@ -53,7 +53,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	size_t ldif_len = fdsize(fd);
-	fprintf(stderr, "File size is %llu\n", (unsigned long long)ldif_len);
+	if (ldif_len == 0) {
+		puts("0");
+		goto close;
+	}
 
 	void *ldif_mm = mmap(0, ldif_len, PROT_READ, MAP_FILE | MAP_NOCACHE | MAP_SHARED, fd, 0);
 	if (MAP_FAILED == ldif_mm) {
@@ -65,5 +68,6 @@ int main(int argc, char *argv[]) {
     printf("%llu\n", (unsigned long long)num_newlines);
 
 	munmap(ldif_mm, ldif_len);
-	close(fd);
+	
+	close: close(fd);
 }
