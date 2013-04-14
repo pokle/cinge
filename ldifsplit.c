@@ -15,6 +15,17 @@ size_t fdsize(int fd) {
 	return stats.st_size;
 }
 
+size_t count_newlines(char *start, size_t len) {
+    size_t count = 0;
+    for(char *curr = start;curr < (start + len); curr++) {
+        if (*curr == '\n') {
+            count++;
+        }
+    }
+    return count;
+}
+
+
 int main(int argc, char *argv[]) {
     
     if (argc < 2) {
@@ -38,11 +49,9 @@ int main(int argc, char *argv[]) {
 		exit(2);
 	}
 
+    size_t num_newlines = count_newlines(ldif_mm, ldif_len);
+    printf("%llu\n", (unsigned long long)num_newlines);
 
-	fprintf(stderr, "Got it!\n %s", ldif_mm);
-
-	// mummap
-
+	munmap(ldif_mm, ldif_len);
 	close(fd);
-
 }
