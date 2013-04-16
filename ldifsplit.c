@@ -11,6 +11,11 @@
 #include <sys/errno.h>
 #include <sys/mman.h>
 
+const char *
+boyermoore_horspool_memmem(const char* haystack, size_t hlen,
+                           const char* needle,   size_t nlen);
+
+
 size_t fdsize(int fd) {
 	struct stat stats;
 	fstat(fd, &stats);
@@ -18,26 +23,26 @@ size_t fdsize(int fd) {
 }
 
 void dump_cns(void *start, size_t len) {
-    char* search = "cn: ";
+    const char* search = "cn: ";
     size_t search_len = strlen(search);
 
-    void  *end = start + len;    
-    void  *curr_str = start;
+    const char* end = start + len;    
+    char*  curr_str = start;
     size_t curr_len = len;
 
     while (curr_str < end) {        
-        void *match = strnstr(curr_str, search, curr_len);
+        const char *match = boyermoore_horspool_memmem(curr_str, curr_len, search, search_len);
         if (NULL == match) {
             break;
         } else {
             // Spit out the value in "key: value"
             {
-                char *match_end = memchr(match, '\n', end - match);
+                char* match_end = memchr(match, '\n', end - match);
                 if (NULL == match_end) {
                     match_end = end;
                 }
 
-                char *value = match + search_len;
+                char* value = match + search_len;
                 size_t value_len =  match_end - value + 1; // +1 to incl. newline
                 fwrite(value, value_len, 1, stdout);
             }
@@ -92,7 +97,7 @@ int main(int argc, char *argv[]) {
 		goto close;
 	}
 
-	void *ldif_mm = mmap(0, ldif_len, PROT_READ, MAP_FILE | MAP_NOCACHE | MAP_SHARED, fd, 0);
+	void *ldif_mm = mmap(0, ldif_len, PROT_READ, MAP_FILE |  MAP_SHARED, fd, 0);
 	if (MAP_FAILED == ldif_mm) {
 		fprintf(stderr, "Unable to memory map %s: %s\n", ldif_fn, strerror(errno));
 		exit(2);
